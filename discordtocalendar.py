@@ -22,6 +22,8 @@ async def on_message(message):
     if DISCORD_CHANNEL_ID is not None and message.channel.id == int(DISCORD_CHANNEL_ID):
         print(f"New message: {message.content}")
         try:
+            message = message.content.strip().split("\n")
+            print(message)
             # TODO: Add splitting message into variables and adding them to google calendar
             pass
         except Exception as e:
