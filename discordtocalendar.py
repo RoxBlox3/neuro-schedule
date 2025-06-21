@@ -22,8 +22,13 @@ async def on_message(message):
     if DISCORD_CHANNEL_ID is not None and message.channel.id == int(DISCORD_CHANNEL_ID):
         print(f"New message: {message.content}")
         try:
-            message = message.content.strip().split("\n")
-            print(message)
+            lines = message.content.strip().split("\n")
+            removed_empty_line = []
+            for line in lines:
+                if line != "" and not line.startswith("Fanart of the week by "):
+                    removed_empty_line.append(line)
+
+            print(removed_empty_line)
             # TODO: Add splitting message into variables and adding them to google calendar
             pass
         except Exception as e:
