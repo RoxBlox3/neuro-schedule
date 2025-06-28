@@ -35,6 +35,7 @@ Google Cloud Platform:
 
 ## Server setup
 
+Clone the github repository wherever you want to run the bot.
 Python 3.10 or higher
 
 ### create a virtual environment and install the requirements
