@@ -1,5 +1,6 @@
 import os
 import re
+import json
 import discord
 from datetime import datetime, timezone
 from dotenv import load_dotenv
@@ -25,8 +26,12 @@ client = CalendarDiscordClient(intents=intents)
 DISCORD_BOT_TOKEN = os.getenv("DISCORD_BOT_TOKEN")
 SCOPES = ["https://www.googleapis.com/auth/calendar.events"]
 CALENDAR_ID = os.getenv("CALENDAR_ID")
+GOOGLE_APPLICATION_CREDENTIALS = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+
 if not CALENDAR_ID:
     raise ValueError("CALENDAR_ID environment variable not set.")
+if not GOOGLE_APPLICATION_CREDENTIALS:
+    raise ValueError("GOOGLE_APPLICATION_CREDENTIALS environment variable not set.")
 
 # patterns for matching timestamps in messages
 online_timestamp_pattern = re.compile(r"<t:(\d+):F>")
@@ -34,7 +39,7 @@ online_timestamp_pattern = re.compile(r"<t:(\d+):F>")
 
 def authenticate_google_calendar():
     creds = service_account.Credentials.from_service_account_file(
-        "service_account.json", scopes=SCOPES
+        GOOGLE_APPLICATION_CREDENTIALS, scopes=SCOPES
     )
     return creds
 
