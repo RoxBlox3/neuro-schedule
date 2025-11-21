@@ -2,12 +2,10 @@ FROM python:3.13
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y git
-RUN git clone https://github.com/RoxBlox3/neuro-schedule
+RUN git clone https://github.com/RoxBlox3/neuro-schedule .
 
-RUN pip install --no-cache-dir -r ./neuro-schedule/requirements.txt
-
-COPY . .
+RUN pip install --no-cache-dir -r requirements.txt
 
 EXPOSE 3000
 
-CMD ["python", "./discordtocalendar.py"]
+CMD ["python", "discordtocalendar.py"]
