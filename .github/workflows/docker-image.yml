@@ -1,0 +1,53 @@
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  docker-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build test image
+        run: docker build -f Dockerfile.test -t neuro-schedule:test .
+
+      - name: Run tests inside container and write junit xml to runner temp
+        env:
+          - CALENDAR_ID=test_calendar
+          - GOOGLE_APPLICATION_CREDENTIALS=/tmp/fake_credentials.json
+          - ENABLE_LOGS=false
+          - DISCORD_BOT_TOKEN=test_token
+        run: |
+          mkdir -p $RUNNER_TEMP/test-results
+          docker run --rm -v $RUNNER_TEMP/test-results:/work/results \
+            neuro-schedule:test pytest --junitxml=/work/results/results.xml -q || true
+          # Make sure we don't fail before uploading artifact; next step can fail if needed.
+
+      - name: Upload pytest junit xml
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-results
+          path: ${{ runner.temp }}/test-results/results.xml
+
+      - name: Fail job if tests failed
+        # this will cause the job to fail if pytest returned non-zero (we allowed non-zero above to ensure artifact upload)
+        if: always()
+        run: |
+          if [ -f $RUNNER_TEMP/test-results/results.xml ]; then
+            # parse junit xml for failures (simple grep)
+            if grep -q 'failures="0" tests=' $RUNNER_TEMP/test-results/results.xml && ! grep -q 'errors=' $RUNNER_TEMP/test-results/results.xml; then
+              echo "No failures found."
+            else
+              echo "Tests reported failures/errors"
+              exit 1
+            fi
+          else
+            echo "No test results found"
+            exit 1
+          fi
