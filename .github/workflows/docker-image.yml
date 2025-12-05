@@ -19,10 +19,10 @@ jobs:
 
       - name: Run tests inside container and write junit xml to runner temp
         env:
-          - CALENDAR_ID=test_calendar
-          - GOOGLE_APPLICATION_CREDENTIALS=/tmp/fake_credentials.json
-          - ENABLE_LOGS=false
-          - DISCORD_BOT_TOKEN=test_token
+          CALENDAR_ID: test_calendar
+          GOOGLE_APPLICATION_CREDENTIALS: /tmp/fake_credentials.json
+          ENABLE_LOGS: "false"
+          DISCORD_BOT_TOKEN: test_token
         run: |
           mkdir -p $RUNNER_TEMP/test-results
           docker run --rm -v $RUNNER_TEMP/test-results:/work/results \
