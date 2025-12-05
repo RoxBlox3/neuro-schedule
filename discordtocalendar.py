@@ -12,12 +12,19 @@ from dateutil import parser
 load_dotenv()
 
 ENABLE_LOGS = os.getenv("ENABLE_LOGS", "0").lower() in ("1", "true", "yes")
-DEFAULT_LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO" if ENABLE_LOGS else "CRITICAL").upper()
-logging.basicConfig(
-    level=getattr(logging, DEFAULT_LOG_LEVEL, logging.INFO),
-    format="%(asctime)s %(levelname)s: %(message)s",
-)
-logger = logging.getLogger(__name__)
+LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
+
+if ENABLE_LOGS:
+    logging.basicConfig(
+        level=getattr(logging, LOG_LEVEL, logging.INFO),
+        format="%(asctime)s %(levelname)s: %(message)s",
+    )
+    logger = logging.getLogger(__name__)
+else:
+    # Completely disable logging when ENABLE_LOGS is falsy so no output is emitted
+    logging.disable(logging.CRITICAL)
+    logger = logging.getLogger(__name__)
+    logger.disabled = True
 
 intents = discord.Intents.default()
 intents.message_content = True

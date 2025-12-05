@@ -1,0 +1,30 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: neuro-schedule:app1.0
+    volumes:
+      - ./service_account.json:/app/service_account.json:ro
+    environment:
+      - CALENDAR_ID=${CALENDAR_ID}
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/service_account.json
+      - ENABLE_LOGS=true
+      - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
+    command: ["python", "-u", "discordtocalendar.py"]
+    tty: true
+
+  tests:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    image: neuro-schedule:test1.0
+    volumes:
+      - ./service_account.json:/tmp/fake_credentials.json:ro
+    environment:
+      - CALENDAR_ID=test_calendar
+      - GOOGLE_APPLICATION_CREDENTIALS=/tmp/fake_credentials.json
+      - ENABLE_LOGS=false
+      - DISCORD_BOT_TOKEN=test_token
+    command: ["python", "-m", "pytest", "-q"]
+    tty: false
