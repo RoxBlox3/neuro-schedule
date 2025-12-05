@@ -1,6 +1,7 @@
 import os
 import re
 import json
+import logging
 import discord
 from datetime import datetime, timezone
 from dotenv import load_dotenv
@@ -9,6 +10,14 @@ from google.oauth2 import service_account
 from dateutil import parser
 
 load_dotenv()
+
+ENABLE_LOGS = os.getenv("ENABLE_LOGS", "0").lower() in ("1", "true", "yes")
+DEFAULT_LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO" if ENABLE_LOGS else "CRITICAL").upper()
+logging.basicConfig(
+    level=getattr(logging, DEFAULT_LOG_LEVEL, logging.INFO),
+    format="%(asctime)s %(levelname)s: %(message)s",
+)
+logger = logging.getLogger(__name__)
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -58,7 +67,7 @@ def insert_event(service, message, start_timestamp, end_timestamp):
             ).isoformat()
         },
     }
-    print(event)
+    logger.debug("Event payload: %s", event)
     service.events().insert(calendarId=CALENDAR_ID, body=event).execute()
 
 
@@ -107,27 +116,27 @@ def parse_message_line(line):
 
 def main():
     try:
-        print("Authenticating with Google Calendar API...")
+        logger.info("Authenticating with Google Calendar API...")
         creds = authenticate_google_calendar()
         service = build("calendar", "v3", credentials=creds)
         client.google_service = service
-        print("Google Calendar API service initialized.")
+        logger.info("Google Calendar API service initialized.")
     except Exception as e:
-        print(f"Failed to authenticate with Google Calendar API: {e}")
+        logger.exception("Failed to authenticate with Google Calendar API: %s", e)
 
     try:
         if DISCORD_BOT_TOKEN is not None:
             client.run(DISCORD_BOT_TOKEN)
     except Exception as e:
-        print(f"Failed to run bot : {e}")
+        logger.exception("Failed to run bot: %s", e)
 
 
 @client.event
 async def on_message(message):
-    print(f"New message: {message.content}")
+    logger.debug("New message: %s", message.content)
     service = getattr(client, "google_service", None)
     if service is None:
-        print("Google Calendar service not initialized.")
+        logger.warning("Google Calendar service not initialized.")
         return
     try:
         lines = message.content.strip().split("\n")
@@ -138,11 +147,11 @@ async def on_message(message):
             if not event_exists(service, start_timestamp, end_timestamp):
                 try:
                     insert_event(service, split_message, start_timestamp, end_timestamp)
-                    print(f"Inserting event: {split_message}")
+                    logger.info("Inserting event: %s", split_message)
                 except Exception as e:
-                    print(f"Failed to insert event: {e}")
+                    logger.exception("Failed to insert event: %s", e)
     except Exception as e:
-        print(f"Failed to parse or create event: {e}")
+        logger.exception("Failed to parse or create event: %s", e)
 
 
 if __name__ == "__main__":
