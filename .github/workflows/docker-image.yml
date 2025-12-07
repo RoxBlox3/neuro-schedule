@@ -45,6 +45,9 @@ jobs:
               echo "No failures found."
             else
               echo "Tests reported failures/errors"
+              echo "----- JUnit XML (for debugging) -----"
+              sed -n '1,200p' "$RUNNER_TEMP/test-results/results.xml" || true
+              echo "-------------------------------------"
               exit 1
             fi
           else
