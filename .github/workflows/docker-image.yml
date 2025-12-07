@@ -39,30 +39,14 @@ jobs:
         # this will cause the job to fail if pytest returned non-zero (we allowed non-zero above to ensure artifact upload)
         if: always()
         run: |
-            if [ -f $RUNNER_TEMP/test-results/results.xml ]; then
-            # parse junit xml for failures/errors reliably using Python
-            python - <<'PY'
-            import xml.etree.ElementTree as ET
-            import os, sys
-
-            path = os.path.join(os.environ.get('RUNNER_TEMP','/tmp'), 'test-results', 'results.xml')
-            try:
-              tree = ET.parse(path)
-              root = tree.getroot()
-              failures = int(root.attrib.get('failures', '0'))
-              errors = int(root.attrib.get('errors', '0'))
-              tests = int(root.attrib.get('tests', '0'))
-            except Exception as e:
-              print('Failed to parse junit xml:', e)
-              sys.exit(1)
-
-            if failures == 0 and errors == 0:
-              print('No failures found.')
-              sys.exit(0)
-            else:
-              print(f'Tests reported failures/errors: failures={failures} errors={errors} tests={tests}')
-              sys.exit(1)
-            PY
+          if [ -f "$RUNNER_TEMP/test-results/results.xml" ]; then
+            # check junit xml for failures/errors using grep for exact zero values
+            if grep -q 'failures="0" tests=' "$RUNNER_TEMP/test-results/results.xml" && grep -q 'errors="0"' "$RUNNER_TEMP/test-results/results.xml"; then
+              echo "No failures found."
+            else
+              echo "Tests reported failures/errors"
+              exit 1
+            fi
           else
             echo "No test results found"
             exit 1
