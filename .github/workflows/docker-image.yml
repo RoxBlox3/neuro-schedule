@@ -41,7 +41,7 @@ jobs:
         run: |
           if [ -f "$RUNNER_TEMP/test-results/results.xml" ]; then
             # check junit xml for failures/errors using grep for exact zero values
-            if grep -q 'failures="0" tests=' "$RUNNER_TEMP/test-results/results.xml" && grep -q 'errors="0"' "$RUNNER_TEMP/test-results/results.xml"; then
+            if grep -q 'failures="0"' "$RUNNER_TEMP/test-results/results.xml" && grep -q 'errors="0"' "$RUNNER_TEMP/test-results/results.xml"; then
               echo "No failures found."
             else
               echo "Tests reported failures/errors"
