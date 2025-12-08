@@ -1,14 +1,13 @@
 name: Publish Test Image
 
 on:
-  push:
-    branches: [ "main" ]
+  release:
+    types: [ published ]
 
 jobs:
   publish-tests:
     name: Build and push test image to Docker Hub
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout
         uses: actions/checkout@v4

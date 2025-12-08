@@ -1,15 +1,13 @@
 name: Publish Docker Image
 
 on:
-  push:
-    branches: [ "main" ]
+  release:  
+    types: [ published ]
 
 jobs:
   publish:
     name: Build and Push to Docker Hub
     runs-on: ubuntu-latest
-    # only run publish on pushes to the main branch
-    if: github.ref == 'refs/heads/main'
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
