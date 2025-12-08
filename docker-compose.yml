@@ -24,7 +24,7 @@ services:
     environment:
       - CALENDAR_ID=test_calendar
       - GOOGLE_APPLICATION_CREDENTIALS=/tmp/fake_credentials.json
-      - ENABLE_LOGS=true
+      - ENABLE_LOGS=false
       - DISCORD_BOT_TOKEN=test_token
     command: ["python", "-m", "pytest", "-q"]
     tty: true
