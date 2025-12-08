@@ -34,7 +34,7 @@ jobs:
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push test image
@@ -44,12 +44,12 @@ jobs:
           file: Dockerfile.test
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/neuro-schedule:test-${{ steps.meta.outputs.image_tag }}
-            ${{ secrets.DOCKERHUB_USERNAME }}/neuro-schedule:test-${{ github.sha }}
+            ${{ vars.DOCKERHUB_USERNAME }}/neuro-schedule:test-${{ steps.meta.outputs.image_tag }}
+            ${{ vars.DOCKERHUB_USERNAME }}/neuro-schedule:test-${{ github.sha }}
           platforms: linux/amd64,linux/arm64
 
       - name: Image info
         run: |
           echo "Pushed test images:"
-          echo "${{ secrets.DOCKERHUB_USERNAME }}/neuro-schedule:test-latest"
-          echo "${{ secrets.DOCKERHUB_USERNAME }}/neuro-schedule:test-${{ github.sha }}"
+          echo "${{ vars.DOCKERHUB_USERNAME }}/neuro-schedule:test-latest"
+          echo "${{ vars.DOCKERHUB_USERNAME }}/neuro-schedule:test-${{ github.sha }}"
