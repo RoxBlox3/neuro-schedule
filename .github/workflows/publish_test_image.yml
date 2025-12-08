@@ -1,17 +1,16 @@
-name: Publish Docker Image
+name: Publish Test Image
 
 on:
   push:
     branches: [ "main" ]
 
 jobs:
-  publish:
-    name: Build and Push to Docker Hub
+  publish-tests:
+    name: Build and push test image to Docker Hub
     runs-on: ubuntu-latest
-    # only run publish on pushes to the main branch
     if: github.ref == 'refs/heads/main'
     steps:
-      - name: Check out repository
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Set up QEMU
@@ -23,7 +22,6 @@ jobs:
       - name: Determine image tag
         id: meta
         run: |
-          echo "GITHUB_REF=${GITHUB_REF}"
           if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
             tag="${GITHUB_REF#refs/tags/}"
           elif [[ "${GITHUB_REF}" == "refs/heads/main" ]]; then
@@ -39,14 +37,19 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push Docker image
+      - name: Build and push test image
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: Dockerfile
+          file: Dockerfile.test
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/neuro-schedule:${{ steps.meta.outputs.image_tag }}
-            ${{ secrets.DOCKERHUB_USERNAME }}/neuro-schedule:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/neuro-schedule:test-${{ steps.meta.outputs.image_tag }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/neuro-schedule:test-${{ github.sha }}
           platforms: linux/amd64,linux/arm64
 
+      - name: Image info
+        run: |
+          echo "Pushed test images:"
+          echo "${{ secrets.DOCKERHUB_USERNAME }}/neuro-schedule:test-latest"
+          echo "${{ secrets.DOCKERHUB_USERNAME }}/neuro-schedule:test-${{ github.sha }}"
