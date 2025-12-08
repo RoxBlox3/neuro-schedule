@@ -1,6 +1,7 @@
 import os
 import sys
 import types
+import logging
 from datetime import datetime, timezone
 from unittest.mock import MagicMock
 
@@ -107,31 +108,52 @@ os.environ.setdefault("GOOGLE_APPLICATION_CREDENTIALS", "/tmp/fake_credentials.j
 import discordtocalendar
 
 
+# Test logging helper controlled by ENABLE_LOGS env var
+ENABLE_TEST_LOGS = os.getenv("ENABLE_LOGS", "0").lower() in ("1", "true", "yes")
+
+# Logger used by tests. Pytest's `log_cli` will display these messages when enabled.
+logger = logging.getLogger("tests")
+if ENABLE_TEST_LOGS:
+    logger.setLevel(logging.INFO)
+else:
+    logger.setLevel(logging.CRITICAL)
+
+def tlog(msg: str):
+    logger.info(msg)
+
+
 def test_parse_message_line_with_description():
+    tlog("[TEST] test_parse_message_line_with_description start")
     ts = 1700000000
     line = f"<t:{ts}:F> - some - This is the description"
     msg, start, end = discordtocalendar.parse_message_line(line)
     assert msg == "This is the description"
     assert start == ts
     assert end == ts + 9000
+    tlog("[TEST] test_parse_message_line_with_description passed")
 
 
 def test_parse_message_line_default_description():
+    tlog("[TEST] test_parse_message_line_default_description start")
     ts = 1700000000
     line = f"<t:{ts}:F> - only"
     msg, start, end = discordtocalendar.parse_message_line(line)
     assert msg == "No description provided"
     assert start == ts
     assert end == ts + 9000
+    tlog("[TEST] test_parse_message_line_default_description passed")
 
 
 def test_parse_message_line_no_match():
+    tlog("[TEST] test_parse_message_line_no_match start")
     line = "no timestamp here"
     msg, start, end = discordtocalendar.parse_message_line(line)
     assert msg is None and start is None and end is None
+    tlog("[TEST] test_parse_message_line_no_match passed")
 
 
 def test_event_exists_true():
+    tlog("[TEST] test_event_exists_true start")
     service = MagicMock()
     start_ts = 1700000000
     end_ts = start_ts + 9000
@@ -142,17 +164,21 @@ def test_event_exists_true():
         "items": [{"start": {"dateTime": start_dt}, "end": {"dateTime": end_dt}}]
     }
     assert discordtocalendar.event_exists(service, start_ts, end_ts) is True
+    tlog("[TEST] test_event_exists_true passed")
 
 
 def test_event_exists_false():
+    tlog("[TEST] test_event_exists_false start")
     service = MagicMock()
     start_ts = 1700000000
     end_ts = start_ts + 9000
     service.events.return_value.list.return_value.execute.return_value = {"items": []}
     assert discordtocalendar.event_exists(service, start_ts, end_ts) is False
+    tlog("[TEST] test_event_exists_false passed")
 
 
 def test_insert_event_calls_service():
+    tlog("[TEST] test_insert_event_calls_service start")
     service = MagicMock()
     start_ts = 1700000000
     end_ts = start_ts + 9000
@@ -167,9 +193,11 @@ def test_insert_event_calls_service():
     assert body["summary"] == "the summary"
     assert body["start"]["dateTime"] == datetime.fromtimestamp(start_ts, tz=timezone.utc).isoformat()
     assert body["end"]["dateTime"] == datetime.fromtimestamp(end_ts, tz=timezone.utc).isoformat()
+    tlog("[TEST] test_insert_event_calls_service passed")
 
 
 def test_authenticate_google_calendar(monkeypatch):
+    tlog("[TEST] test_authenticate_google_calendar start")
     # Patch the underlying credentials factory to avoid reading a real file
     monkeypatch.setattr(
         "discordtocalendar.service_account.Credentials.from_service_account_file",
@@ -177,3 +205,4 @@ def test_authenticate_google_calendar(monkeypatch):
     )
     creds = discordtocalendar.authenticate_google_calendar()
     assert creds == "fake-creds"
+    tlog("[TEST] test_authenticate_google_calendar passed")
