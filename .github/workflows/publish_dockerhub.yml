@@ -1,14 +1,15 @@
 name: Publish Docker Image
 
 on:
-  release:
-    types: [published]
+  push:
+    branches: [ "main" ]
 
 jobs:
   publish:
     name: Build and Push to Docker Hub
     runs-on: ubuntu-latest
-    # only run publish when a release is published
+    # only run publish on pushes to the main branch
+    if: github.ref == 'refs/heads/main'
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
@@ -33,6 +34,6 @@ jobs:
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/neuro-schedule:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/neuro-schedule:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/neuro-schedule:dev-${{ steps.meta.outputs.image_tag }}
           platforms: linux/amd64,linux/arm64
 

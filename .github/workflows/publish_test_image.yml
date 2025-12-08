@@ -1,14 +1,14 @@
 name: Publish Test Image
 
 on:
-  release:
-    types: [published]
+  push:
+    branches: [ "main" ]
 
 jobs:
   publish-tests:
     name: Build and push test image to Docker Hub
     runs-on: ubuntu-latest
-    # only run publish when a release is published
+    if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -45,7 +45,7 @@ jobs:
           push: true
           tags: |
             ${{ vars.DOCKERHUB_USERNAME }}/neuro-schedule:test-${{ steps.meta.outputs.image_tag }}
-            ${{ vars.DOCKERHUB_USERNAME }}/neuro-schedule:test-${{ github.sha }}
+            ${{ vars.DOCKERHUB_USERNAME }}/neuro-schedule:test-latest
           platforms: linux/amd64,linux/arm64
 
       - name: Image info
