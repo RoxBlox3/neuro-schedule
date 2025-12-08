@@ -8,9 +8,9 @@ services:
       - ./service_account.json:/app/service_account.json:ro
     environment:
       - CALENDAR_ID=${CALENDAR_ID}
+      - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
       - GOOGLE_APPLICATION_CREDENTIALS=/app/service_account.json
       - ENABLE_LOGS=true
-      - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
     command: ["python", "-u", "discordtocalendar.py"]
     tty: true
 
@@ -23,8 +23,8 @@ services:
       - ./service_account.json:/tmp/fake_credentials.json:ro
     environment:
       - CALENDAR_ID=test_calendar
+      - DISCORD_BOT_TOKEN=test_token
       - GOOGLE_APPLICATION_CREDENTIALS=/tmp/fake_credentials.json
       - ENABLE_LOGS=false
-      - DISCORD_BOT_TOKEN=test_token
     command: ["python", "-m", "pytest", "-q"]
     tty: true
