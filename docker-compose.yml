@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: "${DOCKERHUB_USERNAME:-neuro-schedule}/${IMAGE_TAG:-latest}"
+    image: "roxblox3/neuro-schedule:${IMAGE_TAG:-latest}"
     volumes:
       - ./service_account.json:/app/service_account.json:ro
     environment:
@@ -18,7 +18,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.test
-    image: "${DOCKERHUB_USERNAME:-neuro-schedule}/test-${IMAGE_TAG:-latest}"
+    image: "roxblox3/neuro-schedule:test-${IMAGE_TAG:-latest}"
     volumes:
       - ./service_account.json:/tmp/fake_credentials.json:ro
     environment:
