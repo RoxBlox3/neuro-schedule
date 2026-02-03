@@ -78,7 +78,7 @@ python discordtocalendar.py
 ## Dockerfile Setup
 To install neuro-schedule using the provided dockerfile
 
-Make sure you have the service_account.json file in the root and a filed .env file
+Make sure you have the service_account.json file in the root and a filled .env file
 
 ```bash
 docker run --rm -t --env-file .env -v "$(pwd)/service_account.json:/app/service_account.json:ro" roxblox3/neuro-schedule python -u discordtocalendar.py
@@ -94,7 +94,7 @@ docker compose up app
 ## Test Dockerfile Setup
 To install neuro-schedule using the provided dockerfile
 
-Make sure you have the service_account.json file in the root and a filed .env file
+Make sure you have the service_account.json file in the root and a filled .env file
 
 ```bash
 docker run --rm -t -v "$(pwd)/service_account.json:/tmp/fake_credentials.json:ro" -e CALENDAR_ID=test_calendar -e DISCORD_BOT_TOKEN=test_token -e GOOGLE_APPLICATION_CREDENTIALS=/tmp/fake_credentials.json -e ENABLE_LOGS=false roxblox3/neuro-schedule:test-latest python -m pytest -q
