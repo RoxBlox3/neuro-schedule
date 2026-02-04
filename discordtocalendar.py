@@ -51,7 +51,7 @@ if not GOOGLE_APPLICATION_CREDENTIALS:
 
 # patterns for matching timestamps in messages
 online_timestamp_pattern = re.compile(r"<t:(\d+):F>")
-
+emoji_pattern = re.compile(r"<a?:[A-Za-z0-9_]+:\d{15,22}>")
 
 def authenticate_google_calendar():
     creds = service_account.Credentials.from_service_account_file(
@@ -117,6 +117,7 @@ def parse_message_line(line):
             split_message = " - ".join(parts[2:])
         else:
             split_message = "No description provided"
+        split_message = emoji_pattern.sub("", split_message).strip()
         return split_message, start_timestamp, end_timestamp
     return None, None, None
 
