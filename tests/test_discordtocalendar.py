@@ -152,6 +152,28 @@ def test_parse_message_line_no_match():
     tlog("[TEST] test_parse_message_line_no_match passed")
 
 
+def test_parse_message_line_strips_emojis_and_falls_back_when_empty():
+    tlog("[TEST] test_parse_message_line_strips_emojis_and_falls_back_when_empty start")
+    ts = 1700000000
+    line = f"<t:{ts}:F> - some - <a:WHAT:1293890244290019420>"
+    msg, start, end = discordtocalendar.parse_message_line(line)
+    assert msg == "No description provided"
+    assert start == ts
+    assert end == ts + 9000
+    tlog("[TEST] test_parse_message_line_strips_emojis_and_falls_back_when_empty passed")
+
+
+def test_parse_message_line_allows_leading_text_before_timestamp():
+    tlog("[TEST] test_parse_message_line_allows_leading_text_before_timestamp start")
+    ts = 1700000000
+    line = f"Info: <t:{ts}:F> - some - Description"  # timestamp not at start
+    msg, start, end = discordtocalendar.parse_message_line(line)
+    assert msg == "Description"
+    assert start == ts
+    assert end == ts + 9000
+    tlog("[TEST] test_parse_message_line_allows_leading_text_before_timestamp passed")
+
+
 def test_event_exists_true():
     tlog("[TEST] test_event_exists_true start")
     service = MagicMock()
@@ -161,9 +183,18 @@ def test_event_exists_true():
     end_dt = datetime.fromtimestamp(end_ts, tz=timezone.utc).isoformat()
     # Mock the chained calls service.events().list(...).execute()
     service.events.return_value.list.return_value.execute.return_value = {
-        "items": [{"start": {"dateTime": start_dt}, "end": {"dateTime": end_dt}}]
+        "items": [
+            {
+                "summary": "the summary",
+                "start": {"dateTime": start_dt},
+                "end": {"dateTime": end_dt},
+            }
+        ]
     }
-    assert discordtocalendar.event_exists(service, start_ts, end_ts) is True
+    assert (
+        discordtocalendar.event_exists(service, "the summary", start_ts, end_ts)
+        is True
+    )
     tlog("[TEST] test_event_exists_true passed")
 
 
@@ -173,7 +204,10 @@ def test_event_exists_false():
     start_ts = 1700000000
     end_ts = start_ts + 9000
     service.events.return_value.list.return_value.execute.return_value = {"items": []}
-    assert discordtocalendar.event_exists(service, start_ts, end_ts) is False
+    assert (
+        discordtocalendar.event_exists(service, "the summary", start_ts, end_ts)
+        is False
+    )
     tlog("[TEST] test_event_exists_false passed")
 
 
